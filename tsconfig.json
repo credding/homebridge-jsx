@@ -2,7 +2,7 @@
   "extends": "@tsconfig/node14",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./dist",
+    "outDir": "./lib",
     "declaration": true
   }
 }
