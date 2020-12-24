@@ -1,8 +1,8 @@
 import { configureChildren } from "./children";
-import { ContextKey } from "./runtime";
+import { ContextKey } from "./runtimeTypes";
 import { Context, ContextProvider } from "./types";
 
-export const createContext = <TValue = any>(): Context<TValue> => {
+export const createContext = <TValue = unknown>(): Context<TValue> => {
   const symbol = Symbol();
 
   const Provider: ContextProvider<TValue> = ({ value, children }) => {

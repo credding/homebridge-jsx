@@ -1,53 +1,41 @@
-import { AsyncLocalStorage } from "async_hooks";
+import { ContextMap, RuntimeContext } from "./runtimeTypes";
 import {
   CleanupCallback,
   Component,
   ComponentFn,
   Configuration,
-  Context,
   EffectCallback,
 } from "./types";
 
-export type ContextMap = Record<any, any>;
+let runtimeContext: RuntimeContext | null = null;
 
-export type ContextKey<TValue> = Context<TValue> & {
-  readonly symbol: symbol;
+export const getRuntimeContext = (): RuntimeContext => {
+  if (runtimeContext === null) {
+    throw new Error("hooks cannot be used inside an effect");
+  }
+  return runtimeContext;
 };
-
-type RuntimeContext = {
-  contextMap: ContextMap;
-  effects: EffectCallback[];
-};
-
-export const runtimeContext = new AsyncLocalStorage<RuntimeContext>();
 
 export const createConfiguration = <TProps, TConfiguration>(
   componentFn: ComponentFn<TProps, TConfiguration>,
   props: TProps
-): Component<TConfiguration> => async (contextMap) => {
-  const { effects } = runtimeContext.getStore()!;
+): Component<TConfiguration> => (contextMap) => {
+  const { effects } = getRuntimeContext();
+  runtimeContext = { contextMap, effects };
 
-  const context = { contextMap, effects };
-
-  return await runtimeContext.run(context, async () => {
-    const component = await componentFn(props);
-    return await component(contextMap);
-  });
+  return componentFn(props)(contextMap);
 };
 
-export const executeConfiguration = async <TState, TReturn>(
+export const applyConfiguration = <TState, TReturn>(
   root: Component<Configuration<TState, TReturn>>,
   state: TState
-): Promise<[TReturn[], CleanupCallback]> => {
+): [TReturn[], CleanupCallback] => {
   const contextMap: ContextMap = {};
   const effects: EffectCallback[] = [];
 
-  const context = { contextMap, effects };
-
-  const result = await runtimeContext.run(context, async () => {
-    const configuration = await root(contextMap);
-    return await configuration(state);
-  });
+  runtimeContext = { contextMap, effects };
+  const result = root(contextMap)(state);
+  runtimeContext = null;
 
   const cleanup: CleanupCallback[] = [];
 

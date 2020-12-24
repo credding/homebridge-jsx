@@ -1,6 +1,9 @@
-import { useContext } from "../../jsx";
 import { PlatformConfig } from "homebridge";
-import { DynamicPlatformContext } from "../DynamicPlatformContext";
+import { useContext } from "../../jsx";
+import { PlatformPluginContext, PluginContext } from "../PluginContext";
 
-export const usePlatformConfig = <TConfig extends Record<string, any>>() =>
-  useContext(DynamicPlatformContext).config as TConfig & PlatformConfig;
+export const usePlatformConfig = <
+  TConfig extends Record<string, unknown>
+>(): TConfig & PlatformConfig =>
+  (useContext(PluginContext) as PlatformPluginContext)
+    .platformConfig as TConfig & PlatformConfig;

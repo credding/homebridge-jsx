@@ -1,30 +1,18 @@
-import { ContextMap } from "./runtime";
+import { ContextMap } from "./runtimeTypes";
 import { Children, Component, Configuration } from "./types";
 
-export const configureChildren = async <TState, TReturn>(
+export const configureChildren = <TState, TReturn>(
   children: Children<Component<Configuration<TState, TReturn>>>,
   contextMap: ContextMap,
   state: TState
-): Promise<TReturn[]> => {
+): TReturn[] => {
   if (typeof children === "undefined") {
     return [];
   }
 
   if (Array.isArray(children)) {
-    const results = await Promise.all(
-      children!.map((child) => configureChild(child, contextMap, state))
-    );
-    return results.flat();
+    return children.map((child) => child(contextMap)(state)).flat();
   }
 
-  return await configureChild(children, contextMap, state);
-};
-
-const configureChild = async <TState, TReturn>(
-  child: Component<Configuration<TState, TReturn>>,
-  contextMap: ContextMap,
-  state: TState
-): Promise<TReturn[]> => {
-  const configuration = await child(contextMap);
-  return await configuration(state);
+  return children(contextMap)(state);
 };

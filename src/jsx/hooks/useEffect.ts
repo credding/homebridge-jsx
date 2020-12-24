@@ -1,7 +1,7 @@
-import { runtimeContext } from "../runtime";
+import { getRuntimeContext } from "../runtime";
 import { EffectCallback } from "../types";
 
-export const useEffect = (effectCb: EffectCallback) => {
-  const { effects } = runtimeContext.getStore()!;
+export const useEffect = (effectCb: EffectCallback): void => {
+  const { effects } = getRuntimeContext();
   effects.push(effectCb);
 };

@@ -1,7 +1,7 @@
 import { PlatformName, PluginIdentifier } from "homebridge";
-import { configureChildren, Component, WithChildren } from "../jsx";
-import { AccessoryConfiguration, DynamicPlatformConfiguration } from "./types";
+import { Component, configureChildren, WithChildren } from "../jsx";
 import { useHomebridgeApi } from "./hooks";
+import { AccessoryConfiguration, DynamicPlatformConfiguration } from "./types";
 
 type DynamicPlatformProps = {
   pluginIdentifier: PluginIdentifier;
@@ -14,12 +14,8 @@ export const DynamicPlatform = (
   const { pluginIdentifier, platformName, children } = props;
   const api = useHomebridgeApi();
 
-  return (context) => async (state) => {
-    const configuredAccessories = await configureChildren(
-      children,
-      context,
-      state
-    );
+  return (context) => (state) => {
+    const configuredAccessories = configureChildren(children, context, state);
 
     const newAccessories = configuredAccessories.filter(
       (accessory) => !state.accessories.includes(accessory)

@@ -1,4 +1,5 @@
 import {
+  Characteristic as HAPCharacteristic,
   CharacteristicEventTypes,
   CharacteristicGetCallback,
   CharacteristicSetCallback,
@@ -7,7 +8,7 @@ import {
   WithUUID,
 } from "homebridge";
 import { Component, Ref, RefObject } from "../jsx";
-import { CharacteristicConfiguration, HAPCharacteristic } from "./types";
+import { CharacteristicConfiguration } from "./types";
 
 type CharacteristicProps<T extends CharacteristicValue> = {
   type: WithUUID<{ new (): HAPCharacteristic }>;
@@ -21,14 +22,14 @@ export const Characteristic = <T extends CharacteristicValue>(
 ): Component<CharacteristicConfiguration> => {
   const { type, onGet, onSet, ref } = props;
 
-  return (_) => async (state) => {
-    var characteristic = state.getCharacteristic(type);
+  return () => (state) => {
+    const characteristic = state.getCharacteristic(type);
 
     characteristic.removeAllListeners();
 
     if (typeof onGet === "function") {
       const getListener = (callback: CharacteristicGetCallback<Nullable<T>>) =>
-        onGet().then(
+        void onGet().then(
           (value) => callback(null, value),
           (error) => callback(error)
         );
@@ -41,7 +42,7 @@ export const Characteristic = <T extends CharacteristicValue>(
         value: CharacteristicValue,
         callback: CharacteristicSetCallback
       ) =>
-        onSet(value as T).then(
+        void onSet(value as T).then(
           () => callback(),
           (error) => callback(error)
         );
@@ -57,11 +58,14 @@ export const Characteristic = <T extends CharacteristicValue>(
   };
 };
 
-export const StringCharacteristic = (props: CharacteristicProps<string>) =>
-  Characteristic(props);
+export const StringCharacteristic = (
+  props: CharacteristicProps<string>
+): Component<CharacteristicConfiguration> => Characteristic(props);
 
-export const NumberCharacteristic = (props: CharacteristicProps<number>) =>
-  Characteristic(props);
+export const NumberCharacteristic = (
+  props: CharacteristicProps<number>
+): Component<CharacteristicConfiguration> => Characteristic(props);
 
-export const BooleanCharacteristic = (props: CharacteristicProps<boolean>) =>
-  Characteristic(props);
+export const BooleanCharacteristic = (
+  props: CharacteristicProps<boolean>
+): Component<CharacteristicConfiguration> => Characteristic(props);

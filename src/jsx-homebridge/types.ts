@@ -1,12 +1,11 @@
-import { Characteristic, PlatformAccessory, Service } from "homebridge";
-import { Configuration } from "../jsx";
-
-export {
-  Categories,
-  Characteristic as HAPCharacteristic,
+import {
+  API,
+  Characteristic,
+  Logging,
   PlatformAccessory,
-  Service as HAPService,
+  Service,
 } from "homebridge";
+import { Component, Configuration } from "../jsx";
 
 export type PlatformAccessories = {
   readonly accessories: ReadonlyArray<PlatformAccessory>;
@@ -28,3 +27,17 @@ export type CharacteristicConfiguration = Configuration<
   Service,
   Characteristic
 >;
+
+export type MaybePromise<T> = T | Promise<T>;
+
+export type DynamicPlatformFactory<TConfig> = (
+  logger: Logging,
+  config: TConfig,
+  api: API
+) => MaybePromise<Component<DynamicPlatformConfiguration>>;
+
+export type AccessoryFactory<TConfig> = (
+  logger: Logging,
+  config: TConfig,
+  api: API
+) => Component<AccessoryConfiguration>;

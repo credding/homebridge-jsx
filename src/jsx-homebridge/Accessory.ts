@@ -1,3 +1,4 @@
+import { Categories, PlatformAccessory } from "homebridge";
 import {
   Component,
   configureChildren,
@@ -6,12 +7,7 @@ import {
   WithChildren,
 } from "../jsx";
 import { useHomebridgeApi } from "./hooks";
-import {
-  AccessoryConfiguration,
-  Categories,
-  PlatformAccessory,
-  ServiceConfiguration,
-} from "./types";
+import { AccessoryConfiguration, ServiceConfiguration } from "./types";
 
 type AccessoryProps = {
   name: string;
@@ -26,17 +22,17 @@ export const Accessory = (
   const { name, uuid, category, ref, children } = props;
   const { hap, platformAccessory } = useHomebridgeApi();
 
-  return (contextMap) => async (state) => {
+  return (contextMap) => (state) => {
     const accessory =
-      state.accessories.find((accessory) => accessory.UUID == uuid) ??
+      state.accessories.find((accessory) => accessory.UUID === uuid) ??
       new platformAccessory(name, uuid, category);
 
     const informationService = accessory.getService(
       hap.Service.AccessoryInformation
-    )!;
+    );
     const configuredServices = [
       informationService,
-      ...(await configureChildren(children, contextMap, accessory)),
+      ...configureChildren(children, contextMap, accessory),
     ];
 
     const removedServices = accessory.services.filter(

@@ -1,3 +1,3 @@
 # Homebridge JSX
 
-Configure Homebridge dynamic platform plugins with JSX
+Configure Homebridge plugins with JSX

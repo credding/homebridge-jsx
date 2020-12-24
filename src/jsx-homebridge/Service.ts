@@ -1,16 +1,12 @@
-import { WithUUID } from "homebridge";
+import { Service as HAPService, WithUUID } from "homebridge";
 import {
-  configureChildren,
   Component,
+  configureChildren,
   Ref,
   RefObject,
   WithChildren,
 } from "../jsx";
-import {
-  CharacteristicConfiguration,
-  HAPService,
-  ServiceConfiguration,
-} from "./types";
+import { CharacteristicConfiguration, ServiceConfiguration } from "./types";
 
 interface ServiceProps {
   type: WithUUID<typeof HAPService>;
@@ -25,8 +21,8 @@ export const Service = (
 ): Component<ServiceConfiguration> => {
   const { type, displayName, subType, primary, ref, children } = props;
 
-  return (contextMap) => async (state) => {
-    var service =
+  return (contextMap) => (state) => {
+    const service =
       (typeof subType !== "undefined"
         ? state.getServiceById(type, subType)
         : state.getService(type)) ??
@@ -45,7 +41,7 @@ export const Service = (
     );
     const configuredCharacteristics = [
       ...requiredCharacteristics,
-      ...(await configureChildren(children, contextMap, service)),
+      ...configureChildren(children, contextMap, service),
     ];
 
     const removedCharacteristics = service.characteristics.filter(

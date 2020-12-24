@@ -1,4 +1,5 @@
+import { API } from "homebridge";
 import { useContext } from "../../jsx";
-import { DynamicPlatformContext } from "../DynamicPlatformContext";
+import { PluginContext } from "../PluginContext";
 
-export const useHomebridgeApi = () => useContext(DynamicPlatformContext).api;
+export const useHomebridgeApi = (): API => useContext(PluginContext).api;

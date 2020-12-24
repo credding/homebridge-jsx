@@ -1,4 +1,5 @@
+import { Logging } from "homebridge";
 import { useContext } from "../../jsx";
-import { DynamicPlatformContext } from "../DynamicPlatformContext";
+import { PluginContext } from "../PluginContext";
 
-export const useLogger = () => useContext(DynamicPlatformContext).logger;
+export const useLogger = (): Logging => useContext(PluginContext).logger;

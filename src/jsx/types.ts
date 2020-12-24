@@ -1,18 +1,16 @@
-import { ContextMap } from "./runtime";
-
-export type MaybePromise<T> = T | Promise<T>;
+import { ContextMap } from "./runtimeTypes";
 
 export type Configuration<TState, TReturn = void> = (
   state: TState
-) => MaybePromise<TReturn[]>;
+) => TReturn[];
 
 export type Component<TConfiguration> = (
   contextMap: ContextMap
-) => MaybePromise<TConfiguration>;
+) => TConfiguration;
 
 export type ComponentFn<TProps, TConfiguration> = (
   props: TProps
-) => MaybePromise<Component<TConfiguration>>;
+) => Component<TConfiguration>;
 
 export type Children<TChildren> = TChildren | TChildren[] | undefined;
 
