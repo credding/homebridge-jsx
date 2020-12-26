@@ -1,12 +1,14 @@
 import { ContextMap } from "./runtimeTypes";
 
-export type Configuration<TState, TReturn = void> = (
-  state: TState
-) => TReturn[];
+export class Configuration<TState, TReturn> {
+  constructor(public applyConfiguration: (state: TState) => TReturn[]) {}
+}
 
-export type Component<TConfiguration> = (
-  contextMap: ContextMap
-) => TConfiguration;
+export class Component<TConfiguration> {
+  constructor(
+    public getConfiguration: (contextMap: ContextMap) => TConfiguration
+  ) {}
+}
 
 export type ComponentFn<TProps, TConfiguration> = (
   props: TProps

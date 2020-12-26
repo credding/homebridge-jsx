@@ -11,14 +11,11 @@ import { applyConfiguration, createConfiguration } from "../jsx/runtime";
 import { PluginContext } from "./PluginContext";
 import { AccessoryConfiguration, AccessoryFactory } from "./types";
 
-const isFactory = <TConfig>(
-  platform: Component<AccessoryConfiguration> | AccessoryFactory<TConfig>
-): platform is AccessoryFactory<TConfig> => typeof platform === "function";
-
 export const configureAccessory = <TConfig = AccessoryConfig>(
   accessory: Component<AccessoryConfiguration> | AccessoryFactory<TConfig>
 ): AccessoryPluginConstructor => {
-  const accessoryFactory = isFactory(accessory) ? accessory : () => accessory;
+  const accessoryFactory =
+    typeof accessory === "function" ? accessory : () => accessory;
 
   return class extends JsxAccessoryPlugin<TConfig> {
     constructor(logger: Logging, config: AccessoryConfig, api: API) {

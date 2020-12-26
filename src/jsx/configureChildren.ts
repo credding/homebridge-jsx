@@ -11,8 +11,12 @@ export const configureChildren = <TState, TReturn>(
   }
 
   if (Array.isArray(children)) {
-    return children.map((child) => child(contextMap)(state)).flat();
+    return children
+      .map((child) =>
+        child.getConfiguration(contextMap).applyConfiguration(state)
+      )
+      .flat();
   }
 
-  return children(contextMap)(state);
+  return children.getConfiguration(contextMap).applyConfiguration(state);
 };

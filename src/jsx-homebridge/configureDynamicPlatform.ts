@@ -16,21 +16,13 @@ import {
   PlatformAccessories,
 } from "./types";
 
-const isFactory = <TConfig>(
-  platform:
-    | Component<DynamicPlatformConfiguration>
-    | DynamicPlatformFactory<TConfig>
-): platform is DynamicPlatformFactory<TConfig> =>
-  typeof platform === "function";
-
 export const configureDynamicPlatform = <TConfig = PlatformConfig>(
   platform:
     | Component<DynamicPlatformConfiguration>
     | DynamicPlatformFactory<TConfig>
 ): PlatformPluginConstructor => {
-  const platformFactory: DynamicPlatformFactory<TConfig> = isFactory(platform)
-    ? platform
-    : () => platform;
+  const platformFactory =
+    typeof platform === "function" ? platform : () => platform;
 
   return class extends JsxDynamicPlatformPlugin<TConfig> {
     constructor(logger: Logging, config: PlatformConfig, api: API) {

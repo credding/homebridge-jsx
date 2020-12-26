@@ -9,6 +9,7 @@ import {
   RefObject,
   WithChildren,
 } from "../jsx";
+import { Configuration } from "../jsx/types";
 import { useHomebridgeApi } from "./hooks";
 import { PlatformAccessoryConfiguration, ServiceConfiguration } from "./types";
 
@@ -26,33 +27,36 @@ export const PlatformAccessory = (
   const { name, uuid, category, external, ref, children } = props;
   const { hap, platformAccessory } = useHomebridgeApi();
 
-  return (contextMap) => (state) => {
-    const accessory =
-      state.accessories.find((accessory) => accessory.UUID === uuid) ??
-      new platformAccessory(name, uuid, category);
+  return new Component(
+    (contextMap) =>
+      new Configuration((state) => {
+        const accessory =
+          state.accessories.find((accessory) => accessory.UUID === uuid) ??
+          new platformAccessory(name, uuid, category);
 
-    const informationService = accessory.getService(
-      hap.Service.AccessoryInformation
-    );
-    const configuredServices = [
-      informationService,
-      ...configureChildren(children, contextMap, accessory),
-    ];
+        const informationService = accessory.getService(
+          hap.Service.AccessoryInformation
+        );
+        const configuredServices = [
+          informationService,
+          ...configureChildren(children, contextMap, accessory),
+        ];
 
-    const removedServices = accessory.services.filter(
-      (service) => !configuredServices.includes(service)
-    );
+        const removedServices = accessory.services.filter(
+          (service) => !configuredServices.includes(service)
+        );
 
-    for (const service of removedServices) {
-      accessory.removeService(service);
-    }
+        for (const service of removedServices) {
+          accessory.removeService(service);
+        }
 
-    if (typeof ref !== "undefined") {
-      (ref as Ref<HPlatformAccessory>).current = accessory;
-    }
+        if (typeof ref !== "undefined") {
+          (ref as Ref<HPlatformAccessory>).current = accessory;
+        }
 
-    return [{ external, accessory }];
-  };
+        return [{ external, accessory }];
+      })
+  );
 };
 
 export const ExternalAccessory = (
