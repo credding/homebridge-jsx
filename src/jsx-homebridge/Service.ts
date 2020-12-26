@@ -28,7 +28,7 @@ export const Service = (
         : state.getService(type)) ??
       state.addService(type, displayName, subType);
 
-    if (primary === true) {
+    if (primary) {
       service.setPrimaryService(true);
     }
 

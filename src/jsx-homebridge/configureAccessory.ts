@@ -16,7 +16,7 @@ const isFactory = <TConfig>(
 ): platform is AccessoryFactory<TConfig> => typeof platform === "function";
 
 export const configureAccessory = <TConfig = AccessoryConfig>(
-  accessory: Component<AccessoryConfiguration>
+  accessory: Component<AccessoryConfiguration> | AccessoryFactory<TConfig>
 ): AccessoryPluginConstructor => {
   const accessoryFactory = isFactory(accessory) ? accessory : () => accessory;
 
@@ -55,12 +55,12 @@ class JsxAccessoryPlugin<TConfig> implements AccessoryPlugin {
         },
         children: this.accessoryFactory(this.logger, this.config, this.api),
       }),
-      { accessories: [] }
+      undefined
     );
 
     this.cleanup = cleanup;
 
-    return result.map((accessory) => accessory.services).flat();
+    return result;
   }
 
   private cleanupEffects() {

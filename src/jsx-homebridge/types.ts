@@ -11,15 +11,22 @@ export type PlatformAccessories = {
   readonly accessories: ReadonlyArray<PlatformAccessory>;
 };
 
+export type AccessoryWithScope = {
+  accessory: PlatformAccessory;
+  external?: boolean;
+};
+
 export type DynamicPlatformConfiguration = Configuration<
   PlatformAccessories,
   PlatformAccessories
 >;
 
-export type AccessoryConfiguration = Configuration<
+export type PlatformAccessoryConfiguration = Configuration<
   PlatformAccessories,
-  PlatformAccessory
+  AccessoryWithScope
 >;
+
+export type AccessoryConfiguration = Configuration<void, Service>;
 
 export type ServiceConfiguration = Configuration<PlatformAccessory, Service>;
 

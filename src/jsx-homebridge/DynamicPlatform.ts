@@ -1,7 +1,10 @@
 import { PlatformName, PluginIdentifier } from "homebridge";
 import { Component, configureChildren, WithChildren } from "../jsx";
 import { useHomebridgeApi } from "./hooks";
-import { AccessoryConfiguration, DynamicPlatformConfiguration } from "./types";
+import {
+  PlatformAccessoryConfiguration,
+  DynamicPlatformConfiguration,
+} from "./types";
 
 type DynamicPlatformProps = {
   pluginIdentifier: PluginIdentifier;
@@ -9,7 +12,8 @@ type DynamicPlatformProps = {
 };
 
 export const DynamicPlatform = (
-  props: DynamicPlatformProps & WithChildren<Component<AccessoryConfiguration>>
+  props: DynamicPlatformProps &
+    WithChildren<Component<PlatformAccessoryConfiguration>>
 ): Component<DynamicPlatformConfiguration> => {
   const { pluginIdentifier, platformName, children } = props;
   const api = useHomebridgeApi();
@@ -17,12 +21,16 @@ export const DynamicPlatform = (
   return (context) => (state) => {
     const configuredAccessories = configureChildren(children, context, state);
 
-    const newAccessories = configuredAccessories.filter(
+    const platformAccessories = configuredAccessories
+      .filter((accessory) => !accessory.external)
+      .map((accessory) => accessory.accessory);
+
+    const newAccessories = platformAccessories.filter(
       (accessory) => !state.accessories.includes(accessory)
     );
 
     const missingAccessories = state.accessories.filter(
-      (accessory) => !configuredAccessories.includes(accessory)
+      (accessory) => !platformAccessories.includes(accessory)
     );
 
     api.registerPlatformAccessories(
@@ -37,6 +45,12 @@ export const DynamicPlatform = (
       missingAccessories
     );
 
-    return [{ accessories: configuredAccessories }];
+    const externalAccessories = configuredAccessories
+      .filter((accessory) => accessory.external)
+      .map((accessory) => accessory.accessory);
+
+    api.publishExternalAccessories(pluginIdentifier, externalAccessories);
+
+    return [{ accessories: platformAccessories }];
   };
 };

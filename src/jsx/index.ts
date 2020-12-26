@@ -1,4 +1,4 @@
-export * from "./children";
-export * from "./context";
+export * from "./configureChildren";
+export * from "./createContext";
 export * from "./hooks";
 export * from "./types";

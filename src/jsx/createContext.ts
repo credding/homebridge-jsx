@@ -1,4 +1,4 @@
-import { configureChildren } from "./children";
+import { configureChildren } from "./configureChildren";
 import { ContextKey } from "./runtimeTypes";
 import { Context, ContextProvider } from "./types";
 

@@ -10,7 +10,7 @@ import {
 let runtimeContext: RuntimeContext | null = null;
 
 export const getRuntimeContext = (): RuntimeContext => {
-  if (runtimeContext === null) {
+  if (!runtimeContext) {
     throw new Error("hooks cannot be used inside an effect");
   }
   return runtimeContext;
