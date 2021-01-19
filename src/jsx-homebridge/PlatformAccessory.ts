@@ -2,14 +2,8 @@ import {
   Categories,
   PlatformAccessory as HPlatformAccessory,
 } from "homebridge";
-import {
-  Component,
-  configureChildren,
-  Ref,
-  RefObject,
-  WithChildren,
-} from "../jsx";
-import { Configuration } from "../jsx/types";
+import { Component, Ref, RefObject, WithChildren } from "../jsx-runtime";
+import { configureWithChildren } from "./configureWithChildren";
 import { useHomebridgeApi } from "./hooks";
 import { PlatformAccessoryConfiguration, ServiceConfiguration } from "./types";
 
@@ -27,36 +21,33 @@ export const PlatformAccessory = (
   const { name, uuid, category, external, ref, children } = props;
   const { hap, platformAccessory } = useHomebridgeApi();
 
-  return new Component(
-    (contextMap) =>
-      new Configuration((state) => {
-        const accessory =
-          state.accessories.find((accessory) => accessory.UUID === uuid) ??
-          new platformAccessory(name, uuid, category);
+  return configureWithChildren((state, childConfigurations) => {
+    const accessory =
+      state.accessories.find((accessory) => accessory.UUID === uuid) ??
+      new platformAccessory(name, uuid, category);
 
-        const informationService = accessory.getService(
-          hap.Service.AccessoryInformation
-        );
-        const configuredServices = [
-          informationService,
-          ...configureChildren(children, contextMap, accessory),
-        ];
+    const informationService = accessory.getService(
+      hap.Service.AccessoryInformation
+    );
+    const configuredServices = [
+      informationService,
+      ...childConfigurations.map((configuration) => configuration(accessory)),
+    ];
 
-        const removedServices = accessory.services.filter(
-          (service) => !configuredServices.includes(service)
-        );
+    const removedServices = accessory.services.filter(
+      (service) => !configuredServices.includes(service)
+    );
 
-        for (const service of removedServices) {
-          accessory.removeService(service);
-        }
+    for (const service of removedServices) {
+      accessory.removeService(service);
+    }
 
-        if (typeof ref !== "undefined") {
-          (ref as Ref<HPlatformAccessory>).current = accessory;
-        }
+    if (typeof ref !== "undefined") {
+      (ref as Ref<HPlatformAccessory>).current = accessory;
+    }
 
-        return [{ external, accessory }];
-      })
-  );
+    return { external, accessory };
+  }, children);
 };
 
 export const ExternalAccessory = (

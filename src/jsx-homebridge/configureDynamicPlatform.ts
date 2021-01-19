@@ -7,13 +7,17 @@ import {
   PlatformConfig,
   PlatformPluginConstructor,
 } from "homebridge";
-import { CleanupCallback, Component } from "../jsx";
-import { applyConfiguration, createConfiguration } from "../jsx/runtime";
-import { PluginContext } from "./PluginContext";
+import {
+  Component,
+  createComponent,
+  EffectCleanupCallback,
+  executeConfiguration,
+} from "../jsx-runtime";
+import { PluginContext } from "./pluginContext";
 import {
   DynamicPlatformConfiguration,
   DynamicPlatformFactory,
-  PlatformAccessories,
+  DynamicPlatformState,
 } from "./types";
 
 export const configureDynamicPlatform = <TConfig = PlatformConfig>(
@@ -32,9 +36,9 @@ export const configureDynamicPlatform = <TConfig = PlatformConfig>(
 };
 
 class JsxDynamicPlatformPlugin<TConfig>
-  implements DynamicPlatformPlugin, PlatformAccessories {
+  implements DynamicPlatformPlugin, DynamicPlatformState {
   accessories: PlatformAccessory[] = [];
-  private cleanup?: CleanupCallback;
+  private cleanup?: EffectCleanupCallback;
 
   constructor(
     private readonly platformFactory: DynamicPlatformFactory<TConfig>,
@@ -53,8 +57,8 @@ class JsxDynamicPlatformPlugin<TConfig>
   private async configurePlatform() {
     this.cleanupEffects();
 
-    const [result, cleanup] = applyConfiguration(
-      createConfiguration(PluginContext.Provider, {
+    const [result, cleanup] = executeConfiguration(
+      createComponent(PluginContext.Provider, {
         value: {
           logger: this.logger,
           platformConfig: this.config,
@@ -69,7 +73,7 @@ class JsxDynamicPlatformPlugin<TConfig>
       this
     );
 
-    this.accessories = result.map((result) => result.accessories).flat();
+    this.accessories = [...result.accessories];
     this.cleanup = cleanup;
   }
 

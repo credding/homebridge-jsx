@@ -1,6 +1,7 @@
 import { AccessoryConfig } from "homebridge";
-import { useContext } from "../../jsx";
-import { AccessoryPluginContext, PluginContext } from "../PluginContext";
+import { useContext } from "../../jsx-runtime";
+import { PluginContext } from "../pluginContext";
+import { AccessoryPluginContext } from "../types";
 
 export const useAccessoryConfig = <
   TConfig extends Record<string, unknown>

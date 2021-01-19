@@ -7,8 +7,9 @@ import {
   Nullable,
   WithUUID,
 } from "homebridge";
-import { Component, Configuration, Ref, RefObject } from "../jsx";
+import { Component, Ref, RefObject } from "../jsx-runtime";
 import { CharacteristicConfiguration } from "./types";
+import { configureWithChildren } from "./configureWithChildren";
 
 type CharacteristicProps<T extends CharacteristicValue> = {
   type: WithUUID<{ new (): HAPCharacteristic }>;
@@ -22,45 +23,40 @@ export const Characteristic = <T extends CharacteristicValue>(
 ): Component<CharacteristicConfiguration> => {
   const { type, onGet, onSet, ref } = props;
 
-  return new Component(
-    () =>
-      new Configuration((state) => {
-        const characteristic = state.getCharacteristic(type);
+  return configureWithChildren((state) => {
+    const characteristic = state.getCharacteristic(type);
 
-        characteristic.removeAllListeners();
+    characteristic.removeAllListeners();
 
-        if (typeof onGet === "function") {
-          const getListener = (
-            callback: CharacteristicGetCallback<Nullable<T>>
-          ) =>
-            void onGet().then(
-              (value) => callback(null, value),
-              (error) => callback(error)
-            );
+    if (typeof onGet === "function") {
+      const getListener = (callback: CharacteristicGetCallback<Nullable<T>>) =>
+        void onGet().then(
+          (value) => callback(null, value),
+          (error) => callback(error)
+        );
 
-          characteristic.on(CharacteristicEventTypes.GET, getListener);
-        }
+      characteristic.on(CharacteristicEventTypes.GET, getListener);
+    }
 
-        if (typeof onSet === "function") {
-          const setListener = (
-            value: CharacteristicValue,
-            callback: CharacteristicSetCallback
-          ) =>
-            void onSet(value as T).then(
-              () => callback(),
-              (error) => callback(error)
-            );
+    if (typeof onSet === "function") {
+      const setListener = (
+        value: CharacteristicValue,
+        callback: CharacteristicSetCallback
+      ) =>
+        void onSet(value as T).then(
+          () => callback(),
+          (error) => callback(error)
+        );
 
-          characteristic.on(CharacteristicEventTypes.SET, setListener);
-        }
+      characteristic.on(CharacteristicEventTypes.SET, setListener);
+    }
 
-        if (typeof ref !== "undefined") {
-          (ref as Ref<HAPCharacteristic>).current = characteristic;
-        }
+    if (typeof ref !== "undefined") {
+      (ref as Ref<HAPCharacteristic>).current = characteristic;
+    }
 
-        return [characteristic];
-      })
-  );
+    return characteristic;
+  });
 };
 
 export const StringCharacteristic = (

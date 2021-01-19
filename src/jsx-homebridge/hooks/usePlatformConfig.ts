@@ -1,6 +1,7 @@
 import { PlatformConfig } from "homebridge";
-import { useContext } from "../../jsx";
-import { PlatformPluginContext, PluginContext } from "../PluginContext";
+import { useContext } from "../../jsx-runtime";
+import { PluginContext } from "../pluginContext";
+import { PlatformPluginContext } from "../types";
 
 export const usePlatformConfig = <
   TConfig extends Record<string, unknown>

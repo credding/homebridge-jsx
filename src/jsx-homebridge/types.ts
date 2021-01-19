@@ -1,32 +1,34 @@
 import {
+  AccessoryConfig,
   API,
   Characteristic,
   Logging,
   PlatformAccessory,
+  PlatformConfig,
   Service,
 } from "homebridge";
-import { Component, Configuration } from "../jsx";
+import { Component, Configuration } from "../jsx-runtime";
 
-export type PlatformAccessories = {
+export type DynamicPlatformState = {
   readonly accessories: ReadonlyArray<PlatformAccessory>;
 };
 
-export type AccessoryWithScope = {
-  accessory: PlatformAccessory;
-  external?: boolean;
-};
-
 export type DynamicPlatformConfiguration = Configuration<
-  PlatformAccessories,
-  PlatformAccessories
+  DynamicPlatformState,
+  DynamicPlatformState
 >;
 
+export type AccessoryWithScope = {
+  readonly accessory: PlatformAccessory;
+  readonly external?: boolean;
+};
+
 export type PlatformAccessoryConfiguration = Configuration<
-  PlatformAccessories,
+  DynamicPlatformState,
   AccessoryWithScope
 >;
 
-export type AccessoryConfiguration = Configuration<void, Service>;
+export type AccessoryConfiguration = Configuration<undefined, Service[]>;
 
 export type ServiceConfiguration = Configuration<PlatformAccessory, Service>;
 
@@ -35,16 +37,30 @@ export type CharacteristicConfiguration = Configuration<
   Characteristic
 >;
 
-export type MaybePromise<T> = T | Promise<T>;
-
 export type DynamicPlatformFactory<TConfig> = (
   logger: Logging,
   config: TConfig,
   api: API
-) => MaybePromise<Component<DynamicPlatformConfiguration>>;
+) =>
+  | Component<DynamicPlatformConfiguration>
+  | Promise<Component<DynamicPlatformConfiguration>>;
 
 export type AccessoryFactory<TConfig> = (
   logger: Logging,
   config: TConfig,
   api: API
 ) => Component<AccessoryConfiguration>;
+
+export type AccessoryPluginContext = {
+  readonly logger: Logging;
+  readonly accessoryConfig: AccessoryConfig;
+  readonly api: API;
+};
+
+export type PlatformPluginContext = {
+  readonly logger: Logging;
+  readonly platformConfig: PlatformConfig;
+  readonly api: API;
+};
+
+export type PluginContext = AccessoryPluginContext | PlatformPluginContext;

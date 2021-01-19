@@ -1,7 +1,7 @@
-import { Component, configureChildren, WithChildren } from "../jsx";
-import { Configuration } from "../jsx/types";
-import { useHomebridgeApi } from "./hooks";
+import { Component, WithChildren } from "../jsx-runtime";
 import { AccessoryConfiguration, ServiceConfiguration } from "./types";
+import { configureWithChildren } from "./configureWithChildren";
+import { useHomebridgeApi } from "./hooks";
 
 export const Accessory = (
   props: WithChildren<Component<ServiceConfiguration>>
@@ -9,14 +9,12 @@ export const Accessory = (
   const { children } = props;
   const { platformAccessory } = useHomebridgeApi();
 
-  return new Component(
-    (contextMap) =>
-      new Configuration(() => {
-        const accessory = new platformAccessory(
-          "_",
-          "00000000-0000-0000-0000-000000000000"
-        );
-        return configureChildren(children, contextMap, accessory);
-      })
-  );
+  return configureWithChildren((state, childConfigurations) => {
+    const accessory = new platformAccessory(
+      "_",
+      "00000000-0000-0000-0000-000000000000"
+    );
+
+    return childConfigurations.map((configuration) => configuration(accessory));
+  }, children);
 };

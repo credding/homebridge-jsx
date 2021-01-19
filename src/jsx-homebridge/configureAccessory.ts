@@ -6,9 +6,13 @@ import {
   APIEvent,
   Logging,
 } from "homebridge";
-import { CleanupCallback, Component } from "../jsx";
-import { applyConfiguration, createConfiguration } from "../jsx/runtime";
-import { PluginContext } from "./PluginContext";
+import {
+  Component,
+  createComponent,
+  EffectCleanupCallback,
+  executeConfiguration,
+} from "../jsx-runtime";
+import { PluginContext } from "./pluginContext";
 import { AccessoryConfiguration, AccessoryFactory } from "./types";
 
 export const configureAccessory = <TConfig = AccessoryConfig>(
@@ -25,7 +29,7 @@ export const configureAccessory = <TConfig = AccessoryConfig>(
 };
 
 class JsxAccessoryPlugin<TConfig> implements AccessoryPlugin {
-  private cleanup?: CleanupCallback;
+  private cleanup?: EffectCleanupCallback;
 
   constructor(
     private readonly accessoryFactory: AccessoryFactory<TConfig>,
@@ -43,8 +47,8 @@ class JsxAccessoryPlugin<TConfig> implements AccessoryPlugin {
   private configureAccessory() {
     this.cleanupEffects();
 
-    const [result, cleanup] = applyConfiguration(
-      createConfiguration(PluginContext.Provider, {
+    const [result, cleanup] = executeConfiguration(
+      createComponent(PluginContext.Provider, {
         value: {
           logger: this.logger,
           accessoryConfig: this.config,

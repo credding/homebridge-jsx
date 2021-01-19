@@ -1,10 +1,10 @@
 import { PlatformName, PluginIdentifier } from "homebridge";
-import { Component, configureChildren, WithChildren } from "../jsx";
-import { Configuration } from "../jsx/types";
+import { Component, WithChildren } from "../jsx-runtime";
+import { configureWithChildren } from "./configureWithChildren";
 import { useHomebridgeApi } from "./hooks";
 import {
-  PlatformAccessoryConfiguration,
   DynamicPlatformConfiguration,
+  PlatformAccessoryConfiguration,
 } from "./types";
 
 type DynamicPlatformProps = {
@@ -19,46 +19,41 @@ export const DynamicPlatform = (
   const { pluginIdentifier, platformName, children } = props;
   const api = useHomebridgeApi();
 
-  return new Component(
-    (contextMap) =>
-      new Configuration((state) => {
-        const configuredAccessories = configureChildren(
-          children,
-          contextMap,
-          state
-        );
+  return configureWithChildren((state, childConfigurations) => {
+    const configuredAccessories = childConfigurations.map((configuration) =>
+      configuration(state)
+    );
 
-        const platformAccessories = configuredAccessories
-          .filter((accessory) => !accessory.external)
-          .map((accessory) => accessory.accessory);
+    const platformAccessories = configuredAccessories
+      .filter((accessory) => !accessory.external)
+      .map((accessory) => accessory.accessory);
 
-        const newAccessories = platformAccessories.filter(
-          (accessory) => !state.accessories.includes(accessory)
-        );
+    const newAccessories = platformAccessories.filter(
+      (accessory) => !state.accessories.includes(accessory)
+    );
 
-        const missingAccessories = state.accessories.filter(
-          (accessory) => !platformAccessories.includes(accessory)
-        );
+    const missingAccessories = state.accessories.filter(
+      (accessory) => !platformAccessories.includes(accessory)
+    );
 
-        api.registerPlatformAccessories(
-          pluginIdentifier,
-          platformName,
-          newAccessories
-        );
+    api.registerPlatformAccessories(
+      pluginIdentifier,
+      platformName,
+      newAccessories
+    );
 
-        api.unregisterPlatformAccessories(
-          pluginIdentifier,
-          platformName,
-          missingAccessories
-        );
+    api.unregisterPlatformAccessories(
+      pluginIdentifier,
+      platformName,
+      missingAccessories
+    );
 
-        const externalAccessories = configuredAccessories
-          .filter((accessory) => accessory.external)
-          .map((accessory) => accessory.accessory);
+    const externalAccessories = configuredAccessories
+      .filter((accessory) => accessory.external)
+      .map((accessory) => accessory.accessory);
 
-        api.publishExternalAccessories(pluginIdentifier, externalAccessories);
+    api.publishExternalAccessories(pluginIdentifier, externalAccessories);
 
-        return [{ accessories: platformAccessories }];
-      })
-  );
+    return { accessories: platformAccessories };
+  }, children);
 };
